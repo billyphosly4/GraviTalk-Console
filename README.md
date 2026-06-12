@@ -121,6 +121,22 @@ Now, simply navigate to [http://localhost:5000](http://localhost:5000) on your l
 
 ---
 
+## 📱 Mobile Device Support (Cross-Platform / Mobile AI)
+
+GraviTalk's architecture supports mobile deployment in two ways:
+
+### 1. Client-Side Web Access
+The dashboard is designed with mobile-first responsive CSS grids. When the server is hosted on a cloud instance, you can access the dashboard on any iOS or Android device by opening Safari, Chrome, or Firefox and navigating to:
+`http://<YOUR_INSTANCE_IP>:5000`
+*(Ensure port 5000 is open in your cloud security group settings).*
+
+### 2. Native On-Device Inference (Mobile AI Track Potential)
+Because smartphones run on powerful ARM64 system-on-chips (Apple Silicon, Snapdragon, MediaTek), the underlying precompiled inference engine can be ported directly:
+* **Android**: Can run local CPU-optimized GGUFs natively using Llama.cpp inside **Termux** or using third-party wrappers like **PocketPal AI**.
+* **iOS**: Can leverage **LLM Farm** or **PocketPal AI** to run GGUFs locally, utilizing Apple's unified memory architecture and Neural Engine.
+
+---
+
 ## 🎥 Demonstration Video (Optional Pitch)
 
 For a quick 3-minute video guide demonstrating GraviTalk in action:
