@@ -982,6 +982,15 @@
             const file = event.target.files[0];
             if (!file) return;
 
+            // Enforce file extension check to prevent binary/image crashes
+            const allowedExtensions = ['txt', 'md', 'csv', 'json', 'log'];
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            if (!allowedExtensions.includes(fileExtension)) {
+                alert("Invalid file format. Please select a plain text document (TXT, MD, CSV, JSON, LOG). Images and binary formats are not supported.");
+                event.target.value = '';
+                return;
+            }
+
             // Enforce 50 KB file size limit
             const maxBytes = 50 * 1024;
             if (file.size > maxBytes) {
