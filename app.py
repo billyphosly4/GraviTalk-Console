@@ -110,6 +110,13 @@ def chat():
             for line in response.iter_lines():
                 if line:
                     chunk = json.loads(line.decode('utf-8'))
+                    
+                    # Check if Ollama returned an API error (e.g. model doesn't support images)
+                    if "error" in chunk:
+                        error_msg = chunk["error"]
+                        yield f"data: {json.dumps({'type': 'error', 'message': error_msg})}\n\n"
+                        return
+                        
                     text = chunk.get("response", "")
                     
                     if first_token_time is None and text:
