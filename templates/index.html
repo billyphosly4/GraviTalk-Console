@@ -645,6 +645,96 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
         }
+
+        /* Responsive Mobile Styles */
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                position: relative;
+            }
+            .sidebar {
+                position: absolute;
+                top: 0;
+                right: -100%;
+                width: 100%;
+                height: 100%;
+                z-index: 20;
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                background: rgba(8, 9, 15, 0.97);
+                backdrop-filter: blur(20px);
+                border-left: 1px solid var(--panel-border);
+                display: flex;
+            }
+            .sidebar.active {
+                transform: translateX(-100%);
+            }
+            header {
+                padding: 10px 15px;
+            }
+            h1 {
+                font-size: 16px;
+                letter-spacing: 0.5px;
+            }
+            .logo-icon {
+                font-size: 20px;
+            }
+            #badge-arm, #badge-ollama {
+                display: none;
+            }
+            #btn-toggle-stats {
+                display: flex !important;
+            }
+        }
+
+        @media (min-width: 901px) {
+            .sidebar {
+                position: static !important;
+                transform: none !important;
+                background: rgba(10, 11, 20, 0.4) !important;
+                width: 380px !important;
+                display: flex !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .chat-history {
+                padding: 15px;
+                gap: 15px;
+            }
+            .message {
+                max-width: 95%;
+                gap: 10px;
+            }
+            .avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            .chat-input-area {
+                padding: 10px 15px;
+            }
+            .input-wrapper {
+                gap: 8px;
+            }
+            textarea {
+                height: 42px;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            .btn-send {
+                width: 42px;
+                height: 42px;
+                font-size: 14px;
+                border-radius: 8px;
+            }
+            .quick-prompts {
+                margin-bottom: 8px;
+            }
+            .prompt-chip {
+                padding: 4px 10px;
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -659,14 +749,18 @@
         </div>
         
         <div class="system-badges">
-            <div class="badge active">
+            <div class="badge active" id="badge-arm">
                 <i class="fa-solid fa-server"></i>
                 <span>Arm64 (aarch64)</span>
             </div>
-            <div class="badge success">
+            <div class="badge success" id="badge-ollama">
                 <i class="fa-solid fa-circle-check"></i>
                 <span>Ollama Engine Active</span>
             </div>
+            <button class="badge" id="btn-toggle-stats" onclick="toggleMobileSidebar()" style="display: none; cursor: pointer; color: var(--accent-cyan); border-color: rgba(0, 242, 254, 0.3); background: rgba(0, 242, 254, 0.05); font-family: inherit;">
+                <i class="fa-solid fa-chart-simple"></i>
+                <span>Stats</span>
+            </button>
         </div>
     </header>
 
@@ -1173,6 +1267,27 @@
                 sendMessage();
             }
         });
+
+        let isSidebarOpen = false;
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const toggleBtn = document.getElementById('btn-toggle-stats');
+            isSidebarOpen = !isSidebarOpen;
+            
+            if (isSidebarOpen) {
+                sidebar.classList.add('active');
+                toggleBtn.innerHTML = '<i class="fa-solid fa-comment"></i> <span>Chat</span>';
+                toggleBtn.style.color = 'var(--accent-green)';
+                toggleBtn.style.borderColor = 'rgba(0, 230, 118, 0.3)';
+                toggleBtn.style.background = 'rgba(0, 230, 118, 0.05)';
+            } else {
+                sidebar.classList.remove('active');
+                toggleBtn.innerHTML = '<i class="fa-solid fa-chart-simple"></i> <span>Stats</span>';
+                toggleBtn.style.color = 'var(--accent-cyan)';
+                toggleBtn.style.borderColor = 'rgba(0, 242, 254, 0.3)';
+                toggleBtn.style.background = 'rgba(0, 242, 254, 0.05)';
+            }
+        }
 
         // Initialize
         window.addEventListener('load', () => {
