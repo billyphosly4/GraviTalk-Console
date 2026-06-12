@@ -70,9 +70,8 @@ Below are representative benchmark results captured on a standard **AWS Graviton
 Follow these step-by-step commands to clone, install, run, and validate GraviTalk on your own Arm64 device or AWS Graviton instance.
 
 ### Prerequisites
-- An Arm64 linux host (e.g., AWS EC2 Graviton Instance running Ubuntu).
-- Python 3.8 or higher.
-- `curl` installed.
+* **Linux/macOS**: Python 3.8+ and `curl` (running on Arm64 host or locally).
+* **Windows**: Python 3.8+ and [Ollama for Windows](https://ollama.com/download/windows) installed.
 
 ### Step 1: Clone the Repository
 ```bash
@@ -80,24 +79,36 @@ git clone https://github.com/your-username/arm-llm-hackathon.git
 cd arm-llm-hackathon
 ```
 
-### Step 2: Install and Download Model
-Run the automated installation script. This script installs Ollama (natively optimized for Arm64), starts the local Ollama background service, pulls the lightweight `phi3:mini` model (or `qwen2.5:1.5b` if your RAM is under 3GB), and creates a local Python virtual environment.
+### Step 2: Install Dependencies & Download Model
 
+#### On Linux / macOS:
+Run the automated installation script. This script installs Ollama (optimized for Arm64), starts the service, pulls the model, and creates a local virtual environment:
 ```bash
 chmod +x install_ollama.sh
 ./install_ollama.sh
 ```
 
-### Step 3: Activate the Virtual Environment
-Activate the Python virtual environment created during installation to ensure all packages (`requests`, `psutil`, `flask`) are available:
+#### On Windows:
+1. Double-click the **`setup_windows.bat`** file (or run it in Command Prompt). This will configure your virtual environment and install the required libraries.
+2. Open Command Prompt and pull the default model:
+   ```cmd
+   ollama pull phi3:mini
+   ```
+
+### Step 3: Run the Web Dashboard
+
+#### On Linux / macOS:
+Activate the environment and start the web server:
 ```bash
 source venv/bin/activate
+python3 app.py
 ```
 
-### Step 4: Run the Web Dashboard
-Start the Flask web backend:
-```bash
-python3 app.py
+#### On Windows:
+Activate the environment and start the web server:
+```cmd
+call venv\Scripts\activate.bat
+python app.py
 ```
 *By default, the server runs on port `5000` (`http://localhost:5000`).*
 
