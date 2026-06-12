@@ -103,7 +103,10 @@ def run_benchmark_trial(model_name, prompt):
     payload = {
         "model": model_name,
         "prompt": prompt,
-        "stream": True
+        "stream": True,
+        "options": {
+            "num_predict": 50
+        }
     }
 
     start_time = time.time()
@@ -200,8 +203,8 @@ def main():
     # 3 prompt sizes for thorough evaluation
     prompts = [
         "Explain recursion in one sentence.",
-        "Write a Python function to check if a number is prime, with docstrings.",
-        "Write a paragraph explaining why running AI models locally on ARM-based edge devices is better for privacy and latency."
+        "Write a concise Python function to check if a number is prime.",
+        "Explain in two sentences why local AI on ARM edge devices improves privacy."
     ]
 
     results = []
