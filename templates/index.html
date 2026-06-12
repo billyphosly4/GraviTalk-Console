@@ -791,7 +791,8 @@
             <div class="chat-input-area">
                 <!-- Attachment preview badge -->
                 <div class="attachment-preview" id="attachment-preview">
-                    <i class="fa-solid fa-file-invoice file-icon"></i>
+                    <i class="fa-solid fa-file-invoice file-icon" id="attachment-icon"></i>
+                    <img id="attachment-img-preview" style="display:none; width:28px; height:28px; object-fit:cover; border-radius:4px; margin-right:5px;" />
                     <span class="file-name" id="attached-file-name">filename.txt</span>
                     <i class="fa-solid fa-circle-xmark remove-btn" onclick="clearAttachment()"></i>
                 </div>
@@ -803,7 +804,7 @@
                 </div>
                 <div class="input-wrapper">
                     <!-- File input -->
-                    <input type="file" id="file-input" style="display:none" accept=".txt,.md,.csv,.json,.log" onchange="handleFileSelect(event)">
+                    <input type="file" id="file-input" style="display:none" accept=".txt,.md,.csv,.json,.log,.png,.jpg,.jpeg" onchange="handleFileSelect(event)">
                     
                     <button class="btn-send btn-attach" id="btn-attach" onclick="triggerFileInput()" title="Attach File (TXT, MD, CSV, JSON, LOG)">
                         <i class="fa-solid fa-paperclip"></i>
@@ -915,7 +916,7 @@
     <script>
         let isGenerating = false;
         let activeModel = '';
-        let attachedFile = { name: '', content: '' };
+        let attachedFile = { name: '', content: '', type: '', base64: '' };
         let recognition = null;
         let isListening = false;
 
@@ -982,39 +983,71 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Enforce file extension check to prevent binary/image crashes
-            const allowedExtensions = ['txt', 'md', 'csv', 'json', 'log'];
             const fileExtension = file.name.split('.').pop().toLowerCase();
-            if (!allowedExtensions.includes(fileExtension)) {
-                alert("Invalid file format. Please select a plain text document (TXT, MD, CSV, JSON, LOG). Images and binary formats are not supported.");
+            const textExtensions = ['txt', 'md', 'csv', 'json', 'log'];
+            const imageExtensions = ['png', 'jpg', 'jpeg'];
+
+            if (!textExtensions.includes(fileExtension) && !imageExtensions.includes(fileExtension)) {
+                alert("Invalid file format. Please select a text file (TXT, MD, CSV, JSON, LOG) or an image (PNG, JPG, JPEG).");
                 event.target.value = '';
                 return;
             }
 
-            // Enforce 50 KB file size limit
-            const maxBytes = 50 * 1024;
-            if (file.size > maxBytes) {
-                alert("File is too large. Please select a text file under 50 KB to ensure fast CPU inference.");
+            const maxTextBytes = 50 * 1024;
+            const maxImgBytes = 1024 * 1024; // 1 MB limit for images
+            
+            if (textExtensions.includes(fileExtension) && file.size > maxTextBytes) {
+                alert("Text file is too large. Please select a text file under 50 KB to ensure fast CPU inference.");
+                event.target.value = '';
+                return;
+            }
+            if (imageExtensions.includes(fileExtension) && file.size > maxImgBytes) {
+                alert("Image file is too large. Please select an image under 1 MB to ensure fast CPU inference.");
                 event.target.value = '';
                 return;
             }
 
             const reader = new FileReader();
-            reader.onload = function(e) {
-                attachedFile.name = file.name;
-                attachedFile.content = e.target.result;
-                
-                // Show preview
-                document.getElementById('attached-file-name').textContent = file.name;
-                document.getElementById('attachment-preview').style.display = 'flex';
-            };
-            reader.readAsText(file);
+            
+            if (imageExtensions.includes(fileExtension)) {
+                reader.onload = function(e) {
+                    attachedFile.name = file.name;
+                    attachedFile.type = 'image';
+                    attachedFile.content = e.target.result; // Data URL for preview
+                    attachedFile.base64 = e.target.result.split(',')[1]; // Raw base64 for Ollama
+                    
+                    // Show preview
+                    document.getElementById('attachment-icon').style.display = 'none';
+                    const imgEl = document.getElementById('attachment-img-preview');
+                    imgEl.src = e.target.result;
+                    imgEl.style.display = 'block';
+                    document.getElementById('attached-file-name').textContent = file.name;
+                    document.getElementById('attachment-preview').style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                reader.onload = function(e) {
+                    attachedFile.name = file.name;
+                    attachedFile.type = 'text';
+                    attachedFile.content = e.target.result;
+                    attachedFile.base64 = '';
+                    
+                    // Show preview
+                    document.getElementById('attachment-img-preview').style.display = 'none';
+                    document.getElementById('attachment-icon').style.display = 'block';
+                    document.getElementById('attached-file-name').textContent = file.name;
+                    document.getElementById('attachment-preview').style.display = 'flex';
+                };
+                reader.readAsText(file);
+            }
         }
 
         function clearAttachment() {
-            attachedFile = { name: '', content: '' };
+            attachedFile = { name: '', content: '', type: '', base64: '' };
             document.getElementById('file-input').value = '';
             document.getElementById('attachment-preview').style.display = 'none';
+            document.getElementById('attachment-img-preview').style.display = 'none';
+            document.getElementById('attachment-icon').style.display = 'block';
         }
 
         // 1. Fetch available models on load
@@ -1103,7 +1136,11 @@
             
             let bubbleContent = prompt;
             if (attachedFile.name) {
-                bubbleContent = `<div style="font-size: 11px; opacity: 0.6; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 3px;"><i class="fa-solid fa-paperclip"></i> Attached: ${attachedFile.name}</div>${prompt}`;
+                if (attachedFile.type === 'image') {
+                    bubbleContent = `<div style="margin-bottom: 8px;"><img src="${attachedFile.content}" style="max-width: 180px; max-height: 180px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);" /></div>${prompt}`;
+                } else {
+                    bubbleContent = `<div style="font-size: 11px; opacity: 0.6; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 3px;"><i class="fa-solid fa-paperclip"></i> Attached: ${attachedFile.name}</div>${prompt}`;
+                }
             }
 
             userMsg.innerHTML = `
@@ -1132,9 +1169,13 @@
 
             // Construct payload
             const payload = { model: activeModel, prompt: prompt };
-            if (attachedFile.name && attachedFile.content) {
-                payload.fileName = attachedFile.name;
-                payload.fileContent = attachedFile.content;
+            if (attachedFile.name) {
+                if (attachedFile.type === 'image') {
+                    payload.images = [attachedFile.base64];
+                } else if (attachedFile.type === 'text') {
+                    payload.fileName = attachedFile.name;
+                    payload.fileContent = attachedFile.content;
+                }
             }
 
             try {

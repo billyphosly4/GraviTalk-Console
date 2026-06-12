@@ -79,6 +79,7 @@ def chat():
     prompt = data.get('prompt')
     file_name = data.get('fileName')
     file_content = data.get('fileContent')
+    images = data.get('images')
     
     if not model or not prompt:
         return jsonify({"status": "error", "message": "Missing model or prompt"}), 400
@@ -94,6 +95,8 @@ def chat():
             "prompt": prompt,
             "stream": True
         }
+        if images:
+            payload["images"] = images
         
         start_time = time.time()
         first_token_time = None
