@@ -771,13 +771,13 @@
             <!-- Automated Benchmarking Suite -->
             <div class="sidebar-section">
                 <div class="section-title">
-                    <i class="fa-solid fa-flask"></i> Benchmark Suite
+                    <i class="fa-solid fa-flask"></i> Performance Benchmark
                 </div>
                 <div class="benchmark-info">
-                    Executes three automated, sequential trial prompts (short, medium, long) to generate a standardized markdown table for your hackathon submission.
+                    Executes standardized multi-context inference workloads (evaluating short, medium, and long contexts) to assess CPU latency, throughput, and peak memory spikes under load.
                 </div>
                 <button class="btn-action" id="btn-benchmark" onclick="runBenchmark()">
-                    <i class="fa-solid fa-play"></i> Run Live Benchmarks
+                    <i class="fa-solid fa-play"></i> Run Performance Trials
                 </button>
                 
                 <!-- Progress and results -->
@@ -1117,7 +1117,7 @@
             resultsBox.style.display = 'block';
             tableEl.style.display = 'none';
             copyBtn.style.display = 'none';
-            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running automated prompts... This takes ~15 seconds.';
+            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Inference testing in progress... Measuring hardware metrics.';
 
             try {
                 const response = await fetch('/api/benchmark', {
