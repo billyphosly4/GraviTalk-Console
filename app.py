@@ -46,6 +46,10 @@ def get_ollama_memory():
 def index():
     return render_template('index.html')
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
 @app.route('/api/models', methods=['GET'])
 def list_models():
     models = get_installed_models()
